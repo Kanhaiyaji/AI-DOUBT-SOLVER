@@ -1,5 +1,5 @@
 const express = require('express');
-const Question = require('../models/Question');
+const questionsDB = require('../db/questionsDB');
 
 const router = express.Router();
 
@@ -7,9 +7,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const limit = req.query.limit || 10;
-    const questions = await Question.find()
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit));
+    const questions = questionsDB.getQuestionsLimit(limit);
 
     res.json({
       success: true,
@@ -24,7 +22,7 @@ router.get('/', async (req, res) => {
 // GET /api/history/:id - Fetch specific question
 router.get('/:id', async (req, res) => {
   try {
-    const question = await Question.findById(req.params.id);
+    const question = questionsDB.getQuestionById(req.params.id);
     if (!question) {
       return res.status(404).json({ error: 'Question not found' });
     }

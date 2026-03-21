@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const Question = require('../models/Question');
+const questionsDB = require('../db/questionsDB');
 const { extractTextFromImage } = require('../middleware/ocr');
 const multer = require('multer');
 const fs = require('fs');
@@ -24,15 +24,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Helper function to call Gemini API
-async function getGeminiResponse(question) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('Gemini API key not configured');
-  }
-
-  const prompt = `
-Please provide:
+// Helper function to call Ollama API (Free Local LLM)
+async function getOllamaResponse(question) {
+  const prompt = `Please provide:
 1. A clear and accurate ANSWER to this question
 2. STEP-BY-STEP EXPLANATION with detailed reasoning
 3. SHORT SUMMARY (2-3 sentences)
@@ -47,26 +41,19 @@ EXPLANATION:
 SUMMARY:
 [Short summary here]
 
-Question: ${question}
-  `;
+Question: ${question}`;
 
   try {
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      'http://localhost:11434/api/generate',
       {
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ]
+        model: 'mistral',
+        prompt: prompt,
+        stream: false
       }
     );
 
-    const content = response.data.candidates[0].content.parts[0].text;
+    const content = response.data.response;
     
     // Parse the response
     const answerMatch = content.match(/ANSWER:\s*([\s\S]*?)(?=EXPLANATION:)/);
@@ -79,7 +66,7 @@ Question: ${question}
       summary: summaryMatch ? summaryMatch[1].trim() : ''
     };
   } catch (error) {
-    throw new Error('Gemini API error: ' + error.message);
+    throw new Error('Ollama API error: ' + error.message + '. Make sure Ollama is running: ollama run mistral');
   }
 }
 
@@ -103,18 +90,16 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     // Get AI response
-    const aiResponse = await getGeminiResponse(question);
+    const aiResponse = await getOllamaResponse(question);
 
     // Save to database
-    const newQuestion = new Question({
+    const newQuestion = questionsDB.saveQuestion({
       originalQuestion: question,
       inputType: inputType,
       answer: aiResponse.answer,
       explanation: aiResponse.explanation,
       summary: aiResponse.summary
     });
-
-    await newQuestion.save();
 
     res.json({
       success: true,

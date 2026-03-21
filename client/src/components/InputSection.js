@@ -66,10 +66,8 @@ function InputSection({ onAsk, onImageUpload, loading }) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setSelectedFile(file);
       onImageUpload(file);
       e.target.value = '';
-      setSelectedFile(null);
     }
   };
 
