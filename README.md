@@ -1,5 +1,5 @@
 # Ordinary AI Doubt Solver
-
+Due to some API issue this project works locally but very soon it will work 
 A clean, minimal, and classy full-stack web application that helps users get instant AI-powered answers to their questions.
 
 ## Features
