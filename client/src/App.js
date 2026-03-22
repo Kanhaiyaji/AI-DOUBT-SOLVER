@@ -11,6 +11,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   // Fetch history on component mount
   useEffect(() => {
@@ -31,6 +32,7 @@ function App() {
   const handleAsk = async (question, inputType) => {
     setLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       const response = await axios.post('/api/ask', {
         question,
@@ -38,10 +40,12 @@ function App() {
       });
       if (response.data.success) {
         setResult(response.data.data);
+        setSuccess(`✨ Great! Got your ${inputType} input. Processing...`);
+        setTimeout(() => setSuccess(null), 3000);
         fetchHistory(); // Refresh history
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred');
+      setError(err.response?.data?.error || '❌ An error occurred');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -85,7 +89,7 @@ function App() {
             className="toggle-history-btn"
             onClick={() => setShowHistory(!showHistory)}
           >
-            {showHistory ? 'Hide History' : 'Show History'}
+            {showHistory ? '📚 Hide History' : '📚 Show History'}
           </button>
 
           {showHistory ? (
@@ -100,10 +104,12 @@ function App() {
 
               {error && <div className="error-message">{error}</div>}
 
+              {success && <div className="success-message">{success}</div>}
+
               {loading && (
                 <div className="loading">
                   <div className="spinner"></div>
-                  <p>Processing your question...</p>
+                  <p>⏳ Processing your question...</p>
                 </div>
               )}
 

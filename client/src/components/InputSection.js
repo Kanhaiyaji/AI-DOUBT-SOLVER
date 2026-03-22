@@ -73,6 +73,7 @@ function InputSection({ onAsk, onImageUpload, loading }) {
 
   return (
     <section className="input-section">
+      <h2 className="section-title">❓ Ask Your Question</h2>
       <div className="input-tabs">
         <button
           className={`tab-btn ${activeTab === 'text' ? 'active' : ''}`}
@@ -98,7 +99,7 @@ function InputSection({ onAsk, onImageUpload, loading }) {
       <div className={`input-area ${activeTab === 'text' ? 'active' : ''}`}>
         <textarea
           className="textarea"
-          placeholder="Type your question here..."
+          placeholder="✍️ Type your question here... (be specific for better answers)"
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
           disabled={loading}
@@ -109,7 +110,7 @@ function InputSection({ onAsk, onImageUpload, loading }) {
           onClick={handleTextSubmit}
           disabled={loading || !textInput.trim()}
         >
-          {loading ? 'Processing...' : 'Submit Question'}
+          {loading ? '⏳ Processing...' : '📤 Submit Question'}
         </button>
       </div>
 
@@ -117,21 +118,23 @@ function InputSection({ onAsk, onImageUpload, loading }) {
       <div className={`input-area ${activeTab === 'voice' ? 'active' : ''}`}>
         <div className="voice-input-container">
           <button
-            className="voice-btn"
+            className={`voice-btn ${isListening ? 'listening' : ''}`}
             onClick={isListening ? stopListening : startListening}
             disabled={loading}
           >
-            {isListening ? '🎤 Listening...' : '🎤 Start Recording'}
+            {isListening ? '🎙️ Listening...' : '🎤 Start Recording'}
           </button>
           {voiceText && (
             <>
-              <div className="voice-text">{voiceText}</div>
+              <div className="voice-text">
+                <strong>📝 Recognized:</strong> {voiceText}
+              </div>
               <button
                 className="submit-btn"
                 onClick={handleVoiceSubmit}
                 disabled={loading}
               >
-                Submit Voice Question
+                🎙️ Submit Voice Question
               </button>
             </>
           )}
@@ -153,7 +156,7 @@ function InputSection({ onAsk, onImageUpload, loading }) {
             📸 Click to upload or drag an image
           </label>
           {selectedFile && (
-            <div className="file-selected">Selected: {selectedFile.name}</div>
+            <div className="file-selected">✅ Selected: {selectedFile.name}</div>
           )}
         </div>
       </div>
